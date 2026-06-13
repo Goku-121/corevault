@@ -8,7 +8,7 @@ const DataSchema = new mongoose.Schema({
     size: String,
 
     qty: { type: Number, required: true },
-    price: { type: Number, required: true }
+   
 
 },{
     timestamps: true,

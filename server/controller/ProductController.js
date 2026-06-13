@@ -8,76 +8,81 @@ const {
     ListByKeywordService, 
     ListByRemarkService, 
     DetailsService, 
-    ReviewListService 
+    ReviewListService,
+    CreateReviewService ,
+    ProductListByFilterService
+
 } = require('../services/ProductServices');
 
 //  CONTROLLER FUNCTIONS
 
-const ProductBrandList = async (req, res) => {
+exports. ProductBrandList = async (req, res) => {
     let result = await ProductBrandListService();
     return res.status(200).json(result);
 
 }
 
-const ProductCategoryList = async (req, res) => {
+exports. ProductCategoryList = async (req, res) => {
     let result = await CategoryListService();
     return res.status(200).json(result);
 };
 
-const ProductSliderList = async (req, res) => {
+exports. ProductSliderList = async (req, res) => {
     let result = await SliderListService();
     return res.status(200).json(result);
 };
 
-const ProductListByBrand = async (req, res) => {
+exports. ProductListByBrand = async (req, res) => {
    let result = await ListByBrandService(req);
    return res.status(200).json(result);
 }
 
-const ProductListByCategory = async (req, res) => {
+exports. ProductListByCategory = async (req, res) => {
       let result = await ListByCategoryService(req);
      return res.status(200).json(result)
     
 };
 
-const ProductListBySimilar = async (req, res) => {
-   
-};
-
-const ProductByKeyword = async (req, res) => {
+exports. ProductListBySimilar = async (req, res) => {
+       let result = await ListBySimilarService(req);
+    return res.status(200).json(result);
     
 };
 
-const ProductListByRemark = async (req, res) => {
+
+exports. ProductByKeyword = async (req, res) => {
+    let result = await ListByKeywordService(req);
+    return res.status(200).json(result);
+    
+};
+
+exports. ProductListByRemark = async (req, res) => {
     let result = await ListByRemarkService(req);
     return res.status(200).json(result);
     
 };
 
-const ProductDetails = async (req, res) => {
+exports. ProductDetails = async (req, res) => {
+    let result = await DetailsService(req);
+    return res.status(200).json(result);
     
 };
 
-const ProductReviewList = async (req, res) => {
-    
+exports. ProductReviewList = async (req, res) => {
+    let result = await ReviewListService(req);
+    return res.status(200).json(result);    
 };
 
-const CreateProductReview = async (req, res) => {
-    
-    return res.status(200).json({ status: "success", message: "Review created" });
+exports.CreateProductReview = async (req, res) => {
+    let result = await CreateReviewService(req);
+    return res.status(200).json(result);
 };
 
-
-module.exports = {
-    ProductBrandList,
-    ProductCategoryList,
-    ProductSliderList,
-    ProductListByBrand,
-    ProductListByCategory,
-    ProductListBySimilar,
-    ProductByKeyword,
-    ProductListByRemark,
-    ProductDetails,
-    ProductReviewList,
-    CreateProductReview
+exports.CreateReview = async (req, res) => {
+    let result =await CreateReviewService(req);
+    return res.status(200).json(result);
 };
+exports.ProductListByFilter = async (req, res) => {
+    let result =await ProductListByFilterService(req);
+    return res.status(200).json(result);
+}
