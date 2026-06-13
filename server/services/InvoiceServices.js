@@ -78,7 +78,7 @@ const CreateInvoiceService = async (req) => {
         const profile = Profile[0];
 
         // ── Check required profile fields ──
-        const requiredFields = ['cus_name', 'cus_add', 'cus_phone', 'cus_city', 'cus_state', 'cus_country'];
+        const requiredFields = ['cus_name', 'cus_add', 'cus_phone', 'cus_city', 'cus_state', 'cus_postcode', 'cus_country'];
         for (let field of requiredFields) {
             if (!profile[field]) {
                 return { status: "fail", message: `Profile is incomplete. Missing field: ${field}. Please update your profile.` };
@@ -157,7 +157,7 @@ const CreateInvoiceService = async (req) => {
         form.append('cus_add2', profile['cus_add']);
         form.append('cus_city', profile['cus_city']);
         form.append('cus_state', profile['cus_state']);
-       form.append('cus_postcode', profile['cus_postcode'] || '1000');
+        form.append('cus_postcode', profile['cus_postcode']);
         form.append('cus_country', profile['cus_country']);
         form.append('cus_phone', profile['cus_phone']);
         form.append('cus_fax', profile['cus_phone']);
@@ -177,7 +177,9 @@ const CreateInvoiceService = async (req) => {
         form.append('product_amount', payable.toString());
 
         let SSLRes = await axios.post(paymentSetting['init_url'], form);
-
+      if (SSLRes.data && SSLRes.data.status === 'SUCCESS') {
+    await CartModel.deleteMany({ userID: user_id });
+}
         return { status: "success", data: SSLRes.data };
 
     } catch (error) {
