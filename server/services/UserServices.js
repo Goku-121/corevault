@@ -85,22 +85,28 @@ const RegisterOTPService = async (req) => {
         let code = Math.floor(100000 + Math.random() * 900000);
         let hashedPassword = await bcrypt.hash(password, 10);
 
-        let EmailText = `Your Registration verification code is = ${code}`;
-        let EmailSubject = "Registration OTP Verification";
-
-        await EmailSend(email, EmailText, EmailSubject);
         await UserModel.updateOne(
             { email: email },
             { $set: { otp: code, password: hashedPassword, is_verified: false } },
             { upsert: true }
         );
 
+        // Email send separately - don't crash if it fails
+        try {
+            let EmailText = `Your Registration verification code is = ${code}`;
+            let EmailSubject = "Registration OTP Verification";
+            await EmailSend(email, EmailText, EmailSubject);
+        } catch (emailError) {
+            console.error("Email send failed:", emailError.message);
+            // Still return success so user knows OTP was generated
+        }
+
         return { status: "success", message: "OTP sent to your email. Please verify to complete registration." };
     } catch (error) {
+        console.error("RegisterOTPService error:", error.message);
         return { status: "fail", message: "Something went wrong" };
     }
 }
-
 const VerifyRegisterOTPService = async (req) => {
     try {
         let { email, otp } = req.body;

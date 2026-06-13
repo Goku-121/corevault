@@ -49,7 +49,11 @@ const CreateInvoiceService = async (req) => {
         let JoinStageProduct = { $lookup: { from: "products", localField: "productID", foreignField: "_id", as: "product" } };
         let unwindStage = { $unwind: "$product" };
 
+        // ── Check cart is not empty ──
         let CartProducts = await CartModel.aggregate([matchStage, JoinStageProduct, unwindStage]);
+        if (!CartProducts || CartProducts.length === 0) {
+            return { status: "fail", message: "Your cart is empty. Please add products before checkout." };
+        }
 
         let totalAmount = 0;
         CartProducts.forEach((element) => {
@@ -65,9 +69,32 @@ const CreateInvoiceService = async (req) => {
         let vat = totalAmount * 0.05;
         let payable = totalAmount + vat;
 
+        // ── Check profile exists ──
         let Profile = await ProfileModel.aggregate([matchStage]);
-        let cus_details = `Name:${Profile[0]['cus_name']} , Email:${cus_email}, Address:${Profile[0]['cus_add']} , Phone:${Profile[0]['cus_phone']}`;
-        let shipping_details = `Name:${Profile[0]['shipping_name']} , City:${Profile[0]['shipping_city']}, Address:${Profile[0]['shipping_address']} , Country:${Profile[0]['shipping_country']}, Phone:${Profile[0]['shipping_phone']}`;
+        if (!Profile || Profile.length === 0) {
+            return { status: "fail", message: "Profile not found. Please complete your profile before checkout." };
+        }
+
+        const profile = Profile[0];
+
+        // ── Check required profile fields ──
+        const requiredFields = ['cus_name', 'cus_add', 'cus_phone', 'cus_city', 'cus_state', 'cus_postcode', 'cus_country'];
+        for (let field of requiredFields) {
+            if (!profile[field]) {
+                return { status: "fail", message: `Profile is incomplete. Missing field: ${field}. Please update your profile.` };
+            }
+        }
+
+        // ── Check shipping fields ──
+        const requiredShippingFields = ['shipping_name', 'shipping_address', 'shipping_city', 'shipping_country', 'shipping_phone'];
+        for (let field of requiredShippingFields) {
+            if (!profile[field]) {
+                return { status: "fail", message: `Shipping info is incomplete. Missing field: ${field}. Please update your profile.` };
+            }
+        }
+
+        let cus_details = `Name:${profile['cus_name']} , Email:${cus_email}, Address:${profile['cus_add']} , Phone:${profile['cus_phone']}`;
+        let shipping_details = `Name:${profile['shipping_name']} , City:${profile['shipping_city']}, Address:${profile['shipping_address']} , Country:${profile['shipping_country']}, Phone:${profile['shipping_phone']}`;
 
         let tran_id = Math.floor(10000000 + Math.random() * 90000000).toString();
         let val_id = 0;
@@ -89,7 +116,6 @@ const CreateInvoiceService = async (req) => {
 
         let invoice_id = createInvoice['_id'];
 
-        
         await Promise.all(CartProducts.map(async (element) => {
             await InvoiceProductModel.create({
                 userID: user_id,
@@ -104,54 +130,60 @@ const CreateInvoiceService = async (req) => {
 
         await CartModel.deleteMany({ userID: user_id });
 
+        // ── Check payment settings exist ──
         let PaymentSettings = await PaymentSettingModel.find();
+        if (!PaymentSettings || PaymentSettings.length === 0) {
+            return { status: "fail", message: "Payment settings not configured. Please contact support." };
+        }
+
+        const paymentSetting = PaymentSettings[0];
 
         const form = new FormData();
 
-        form.append('store_id', PaymentSettings[0]['store_id']);
-        form.append('store_passwd', PaymentSettings[0]['store_passwd']);
+        form.append('store_id', paymentSetting['store_id']);
+        form.append('store_passwd', paymentSetting['store_passwd']);
         form.append('total_amount', payable.toString());
-        form.append('currency', PaymentSettings[0]['currency']);
+        form.append('currency', paymentSetting['currency']);
         form.append('tran_id', tran_id);
 
-        form.append('success_url', `${PaymentSettings[0]['success_url']}/${tran_id}`);
-        form.append('fail_url', `${PaymentSettings[0]['fail_url']}/${tran_id}`);
-        form.append('cancel_url', `${PaymentSettings[0]['cancel_url']}/${tran_id}`);
-        form.append('ipn_url', `${PaymentSettings[0]['ipn_url']}/${tran_id}`);
+        form.append('success_url', `${paymentSetting['success_url']}/${tran_id}`);
+        form.append('fail_url', `${paymentSetting['fail_url']}/${tran_id}`);
+        form.append('cancel_url', `${paymentSetting['cancel_url']}/${tran_id}`);
+        form.append('ipn_url', `${paymentSetting['ipn_url']}/${tran_id}`);
 
-        form.append('cus_name', Profile[0]['cus_name']);
+        form.append('cus_name', profile['cus_name']);
         form.append('cus_email', cus_email);
-        form.append('cus_add1', Profile[0]['cus_add']);
-        form.append('cus_add2', Profile[0]['cus_add']);
-        form.append('cus_city', Profile[0]['cus_city']);
-        form.append('cus_state', Profile[0]['cus_state']);
-        form.append('cus_postcode', Profile[0]['cus_postcode']);
-        form.append('cus_country', Profile[0]['cus_country']);
-        form.append('cus_phone', Profile[0]['cus_phone']);
-        form.append('cus_fax', Profile[0]['cus_phone']);
+        form.append('cus_add1', profile['cus_add']);
+        form.append('cus_add2', profile['cus_add']);
+        form.append('cus_city', profile['cus_city']);
+        form.append('cus_state', profile['cus_state']);
+        form.append('cus_postcode', profile['cus_postcode']);
+        form.append('cus_country', profile['cus_country']);
+        form.append('cus_phone', profile['cus_phone']);
+        form.append('cus_fax', profile['cus_phone']);
 
         form.append('shipping_method', "YES");
-        form.append('ship_name', Profile[0]['shipping_name']);
-        form.append('ship_add1', Profile[0]['shipping_address']);
-        form.append('ship_add2', Profile[0]['shipping_address']);
-        form.append('ship_city', Profile[0]['shipping_city']);
-        form.append('ship_state', Profile[0]['shipping_state']);
-        form.append('ship_country', Profile[0]['shipping_country']);
-        form.append('ship_postcode', Profile[0]['shipping_postalcode']);
+        form.append('ship_name', profile['shipping_name']);
+        form.append('ship_add1', profile['shipping_address']);
+        form.append('ship_add2', profile['shipping_address']);
+        form.append('ship_city', profile['shipping_city']);
+        form.append('ship_state', profile['shipping_state'] || profile['shipping_city']);
+        form.append('ship_country', profile['shipping_country']);
+        form.append('ship_postcode', profile['shipping_postalcode'] || '1000');
 
-        form.append('product_name', 'Tech Head Shop According to the Invoice');
-        form.append('product_category', 'Tech Head Shop category According to the Invoice');
-        form.append('product_profile', 'Tech Head Shop Product profile According to the Invoice');
-        form.append('product_amount', 'According to the Invoice');
+        form.append('product_name', 'CoreVault Order');
+        form.append('product_category', 'Tech Products');
+        form.append('product_profile', 'general');
+        form.append('product_amount', payable.toString());
 
-        let SSLRes = await axios.post(PaymentSettings[0]['init_url'], form);
+        let SSLRes = await axios.post(paymentSetting['init_url'], form);
 
         return { status: "success", data: SSLRes.data };
 
     } catch (error) {
-    console.error("CreateInvoiceService Error:", error.message, error.stack);
-    return { status: "fail", message: error.message };
-}
+        console.error("CreateInvoiceService Error:", error.message, error.stack);
+        return { status: "fail", message: error.message };
+    }
 };
 
 // ================= Payment Fail =================
@@ -191,7 +223,7 @@ const PaymentSuccessInvoiceService = async (req) => {
 const PaymentIPNInvoiceService = async (req) => {
     try {
         let trxID = req.params.trxID;
-        let status = req.body['status']; 
+        let status = req.body['status'];
         await InvoiceModel.updateOne({ tran_id: trxID }, { payment_status: status });
         return { status: "success" };
     } catch (e) {

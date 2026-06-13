@@ -10,7 +10,7 @@ const EmailSend = async (EmailTo, EmailText, EmailSubject) => {
             pass: process.env.EMAIL_PASS
         },
         tls: {
-            rejectUnauthorized: false  
+            rejectUnauthorized: false
         }
     });
 
