@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home-page";
 import ProductByBrand from "./pages/product-by-brand";
@@ -27,10 +27,16 @@ import AdminProducts from "./pages/admin/admin-products";
 import AdminOrders from "./pages/admin/admin-orders";
 import AdminUsers from "./pages/admin/admin-users";
 import AdminRegister from "./pages/admin/admin-register";
-import AdminRegisterOtpForm from "./pages/admin/admin-register-otp"; 
+import AdminRegisterOtpForm from "./pages/admin/admin-register-otp";
 import AdminLogin from "./pages/admin/admin-login";
 import InvoicePage from "./pages/invoice-page";
+
 const App = () => {
+  // Wake up Render server on page load
+  useEffect(() => {
+    fetch("https://corevault-8qkj.onrender.com/health").catch(() => {});
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -61,12 +67,11 @@ const App = () => {
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
-        <Route path="/admin/register/verify" element={<AdminRegisterOtpForm />} />  {/* ← নতুন */}
+        <Route path="/admin/register/verify" element={<AdminRegisterOtpForm />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/users" element={<AdminUsers />} />
-      
       </Routes>
     </BrowserRouter>
   );

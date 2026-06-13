@@ -40,7 +40,7 @@ app.use(hpp());
 
 //  uploads folder static serve — routes 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 // rate limit
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
