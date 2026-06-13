@@ -24,7 +24,16 @@ app.use(express.json({ limit: '54mb' }));
 app.use(express.urlencoded({ limit: '54mb', extended: true }));
 app.use(cookieParser());
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+}));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
