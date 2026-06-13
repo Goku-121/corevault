@@ -23,7 +23,7 @@ const ProfileForm = () => {
 
         if (res) {
             toast.success("Profile Saved Successfully");
-            await ProfileDetailsRequest();  // Refresh
+            await ProfileDetailsRequest();
         } else {
             toast.error("Failed to save profile");
         }
@@ -69,6 +69,12 @@ const ProfileForm = () => {
                     <div className="col-md-4">
                         <label className="form-label">Customer State</label>
                         <input value={ProfileForm.cus_state || ""} onChange={(e) => ProfileFormChange("cus_state", e.target.value)} className="form-control" />
+                    </div>
+
+                    {/* ✅ NEW: Customer Postcode */}
+                    <div className="col-md-4">
+                        <label className="form-label">Customer Postcode</label>
+                        <input value={ProfileForm.cus_postcode || ""} onChange={(e) => ProfileFormChange("cus_postcode", e.target.value)} className="form-control" />
                     </div>
 
                     <div className="col-md-12">
