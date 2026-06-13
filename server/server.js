@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path'); 
-
+require('dotenv').config();
 app.set('trust proxy', 1);
 
 const router = require('./routes/api');
@@ -15,7 +15,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 
 // DB
-mongoose.connect('mongodb://127.0.0.1:27017/ecommarce')
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("Database Connected"))
 .catch(err => console.log(err))
 
@@ -51,7 +51,7 @@ app.get('*', (req, res) => {
 });
 
 // server
-app.listen(5020, () => {
+app.listen(process.env.PORT || 5020, () => {
   console.log("Server running on port 5020");
 });
 

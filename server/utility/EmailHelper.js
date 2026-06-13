@@ -6,9 +6,8 @@ const EmailSend = async (EmailTo, EmailText, EmailSubject) => {
         port: 587,
         secure: false,
         auth: {
-            user: 'khanshovo67@gmail.com',
-            pass: 'qcvclumbyxeojjog'
-
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
         tls: {
             rejectUnauthorized: false  
@@ -16,7 +15,7 @@ const EmailSend = async (EmailTo, EmailText, EmailSubject) => {
     });
 
     let mailOptions = {
-        from: `CoreVault <khanshovo67@gmail.com>`,
+        from: `CoreVault <${process.env.EMAIL_USER}>`,
         to: EmailTo,
         subject: EmailSubject,
         text: EmailText
