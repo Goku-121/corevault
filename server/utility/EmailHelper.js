@@ -7,12 +7,14 @@ const EmailSend = async (EmailTo, EmailText, EmailSubject) => {
         secure: false,
         auth: {
             user: 'khanshovo67@gmail.com',
-            pass: 'qcvclumbyxeojjog'
-
+            pass: 'dmjhqizwuwvlbvsy'
         },
         tls: {
-            rejectUnauthorized: false  
-        }
+            rejectUnauthorized: false
+        },
+        connectionTimeout: 5000,  
+        greetingTimeout: 5000,    
+        socketTimeout: 5000      
     });
 
     let mailOptions = {
