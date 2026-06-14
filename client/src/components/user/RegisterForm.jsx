@@ -28,7 +28,9 @@ const RegisterForm = () => {
         }
 
         let res = await RegisterOTPRequest(RegisterFormData.email, RegisterFormData.password);
-        res ? navigate("/register-otp") : toast.error("Something went wrong. Please try again.");
+        res
+            ? (toast.success("Registration successful!"), navigate("/login"))
+            : toast.error("Something went wrong. Please try again.");
     };
 
     return (
@@ -37,8 +39,7 @@ const RegisterForm = () => {
                 <div className="col-md-5">
                     <div className="card p-5">
                         <h4>Create Account</h4>
-                        <p>Enter your email and choose a password. We'll send a verification code.</p>
-
+                        <p>Enter your email and choose a password.</p>
                         <input
                             value={RegisterFormData.email}
                             onChange={(e) => RegisterFormOnChange('email', e.target.value)}
@@ -60,13 +61,11 @@ const RegisterForm = () => {
                             type="password"
                             className="form-control"
                         />
-
                         <SubmitButton
                             onClick={onFormSubmit}
                             className="btn mt-3 btn-success"
-                            text="Send Verification Code"
+                            text="Create Account"
                         />
-
                         <p className="mt-3 text-center mb-0">
                             Already have an account? <Link to="/login" className="text-success">Login</Link>
                         </p>

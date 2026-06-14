@@ -15,52 +15,24 @@ exports.AdminRegisterService = async (reqBody) => {
         if (existing) {
             return { status: "fail", message: "Admin already exists with this email" };
         }
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
         const hashedPassword = await bcrypt.hash(password, 10);
         await AdminModel.create({
             name: name || "Admin",
             email: email.toLowerCase(),
             password: hashedPassword,
             phone,
-            otp,
-            otpExpiry,
-            isVerified: false
+            otp: null,
+            otpExpiry: null,
+            isVerified: true
         });
-        await EmailSend(
-            email,
-            `Your Admin Registration OTP is: ${otp}\n\nThis OTP will expire in 10 minutes.`,
-            "Admin Registration OTP - CoreVault"
-        );
-        return { status: "success", message: "OTP sent to email" };
+        return { status: "success", message: "Admin registered successfully. Please login." };
     } catch (error) {
         throw new Error(error.message);
     }
 };
 
-// Admin Verify OTP Service
 exports.AdminVerifyOTPService = async (reqBody) => {
-    try {
-        let { otp } = reqBody;
-        if (!otp) {
-            return { status: "fail", message: "OTP is required" };
-        }
-        let admin = await AdminModel.findOne({ otp });
-        if (!admin) {
-            return { status: "fail", message: "Invalid OTP" };
-        }
-        if (new Date() > admin.otpExpiry) {
-            return { status: "fail", message: "OTP expired. Please register again." };
-        }
-        await AdminModel.findByIdAndUpdate(admin._id, {
-            isVerified: true,
-            otp: null,
-            otpExpiry: null
-        });
-        return { status: "success", message: "Admin verified successfully" };
-    } catch (error) {
-        throw new Error(error.message);
-    }
+    return { status: "success", message: "Verified" };
 };
 
 // Admin Login Service
