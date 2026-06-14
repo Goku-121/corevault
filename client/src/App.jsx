@@ -23,7 +23,6 @@ import AdminProducts from "./pages/admin/admin-products";
 import AdminOrders from "./pages/admin/admin-orders";
 import AdminUsers from "./pages/admin/admin-users";
 import AdminRegister from "./pages/admin/admin-register";
-import AdminLogin from "./pages/admin/admin-login";
 import InvoicePage from "./pages/invoice-page";
 
 const App = () => {
@@ -54,7 +53,6 @@ const App = () => {
         <Route path="/wishlist" element={<WishPage />} />
         <Route path="/orders" element={<OrderPage />} />
         <Route path="/invoice/:id" element={<InvoicePage />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<AdminProducts />} />

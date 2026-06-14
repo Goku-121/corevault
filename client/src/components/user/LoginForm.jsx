@@ -1,36 +1,35 @@
-import React from 'react'
+
 import SubmitButton from './UserSubmitButton'
 import userStore from '../../store/UserStroe'
-import AdminStore from '../../store/AdminStore'
-import ValidatonHelper from '../../utility/ValidatonHelper'
+import ValidationHelper from '../../utility/ValidatonHelper'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from "react-router-dom"
 
 const LoginForm = () => {
-
     let navigate = useNavigate();
-    let { PasswordLoginFormData, PasswordLoginFormOnChange, LoginWithPasswordRequest } = userStore();
-    let { isAdminLogin } = AdminStore();
+    let { PasswordLoginFormData, PasswordLoginFormOnChange, UnifiedLoginRequest, isFormSubmit } = userStore();
 
     const onFormSubmit = async () => {
-        if (!ValidatonHelper.IsEmail(PasswordLoginFormData.email)) {
+        if (!ValidationHelper.IsEmail(PasswordLoginFormData.email)) {
             toast.error("Please enter a valid email address");
             return;
         }
-        if (ValidatonHelper.IsEmpty(PasswordLoginFormData.password || "")) {
+        if (ValidationHelper.IsEmpty(PasswordLoginFormData.password || "")) {
             toast.error("Please enter your password");
             return;
         }
 
-        let res = await LoginWithPasswordRequest(PasswordLoginFormData.email, PasswordLoginFormData.password);
+        let role = await UnifiedLoginRequest(
+            PasswordLoginFormData.email,
+            PasswordLoginFormData.password
+        );
 
-        if (res) {
-            // Admin admin dashboard 
-            if (isAdminLogin()) {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/");
-            }
+        if (role === "admin") {
+            toast.success("Admin login successful!");
+            navigate("/admin/dashboard");
+        } else if (role === "user") {
+            toast.success("Login successful!");
+            navigate("/");
         } else {
             toast.error("Invalid email or password");
         }
@@ -41,7 +40,6 @@ const LoginForm = () => {
             <div className="row d-flex justify-content-center">
                 <div className="col-md-5">
                     <div className="card p-5">
-
                         <h4>Login</h4>
                         <p>Enter your email and password to login.</p>
 
@@ -62,8 +60,9 @@ const LoginForm = () => {
 
                         <SubmitButton
                             onClick={onFormSubmit}
+                            disabled={isFormSubmit}
                             className="btn mt-3 btn-success"
-                            text="Login"
+                            text={isFormSubmit ? "Signing in..." : "Login"}
                         />
 
                         <p className="mt-3 text-center mb-0">
