@@ -12,27 +12,21 @@ import PrivacyPage from "./pages/privacy-page";
 import HowToBuyPage from "./pages/how-to-buy-page";
 import ContactPage from "./pages/contact-page";
 import ComplaintPage from "./pages/complaint-page";
-import OtpPage from "./pages/otp-page";
 import LoginPage from "./pages/login-page";
 import RegisterPage from "./pages/register-page";
-import RegisterOtpPage from "./pages/register-otp";
 import ProfilePage from "./pages/profile-page";
 import CartPage from "./pages/cart-list";
 import WishPage from "./pages/wish-page";
 import OrderPage from "./pages/order-page";
-
-// Admin Pages
 import AdminDashboard from "./pages/admin/admin-dashboard";
 import AdminProducts from "./pages/admin/admin-products";
 import AdminOrders from "./pages/admin/admin-orders";
 import AdminUsers from "./pages/admin/admin-users";
 import AdminRegister from "./pages/admin/admin-register";
-import AdminRegisterOtpForm from "./pages/admin/admin-register-otp";
 import AdminLogin from "./pages/admin/admin-login";
 import InvoicePage from "./pages/invoice-page";
 
 const App = () => {
-  // Wake up Render server on page load
   useEffect(() => {
     fetch("https://corevault-8qkj.onrender.com/health").catch(() => {});
   }, []);
@@ -40,7 +34,6 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* User Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/details/:id" element={<ProductByDetails />} />
         <Route path="/product/:id" element={<ProductByDetails />} />
@@ -54,20 +47,15 @@ const App = () => {
         <Route path="/howtobuy" element={<HowToBuyPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/complaint" element={<ComplaintPage />} />
-        <Route path="/otp" element={<OtpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/register-otp" element={<RegisterOtpPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/wishlist" element={<WishPage />} />
         <Route path="/orders" element={<OrderPage />} />
         <Route path="/invoice/:id" element={<InvoicePage />} />
-
-        {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
-        <Route path="/admin/register/verify" element={<AdminRegisterOtpForm />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/orders" element={<AdminOrders />} />

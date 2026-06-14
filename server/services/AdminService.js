@@ -1,7 +1,6 @@
 const AdminModel = require('../models/AdminModel');
 const bcrypt = require('bcrypt');
 const { Encodetoken } = require('../utility/TokenHelper');
-const EmailSend = require('../utility/EmailHelper');
 const ProductDetailsModel = require('../models/ProductDetailsModel');
 
 // Admin Register Service
@@ -21,18 +20,12 @@ exports.AdminRegisterService = async (reqBody) => {
             email: email.toLowerCase(),
             password: hashedPassword,
             phone,
-            otp: null,
-            otpExpiry: null,
             isVerified: true
         });
         return { status: "success", message: "Admin registered successfully. Please login." };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
-};
-
-exports.AdminVerifyOTPService = async (reqBody) => {
-    return { status: "success", message: "Verified" };
 };
 
 // Admin Login Service
@@ -46,9 +39,6 @@ exports.AdminLoginService = async (reqBody) => {
         if (!admin) {
             return { status: "fail", message: "Admin not found" };
         }
-        if (!admin.isVerified) {
-            return { status: "fail", message: "Account not verified. Please complete OTP verification." };
-        }
         let isMatch = await bcrypt.compare(password, admin.password);
         if (!isMatch) {
             return { status: "fail", message: "Incorrect password" };
@@ -58,14 +48,10 @@ exports.AdminLoginService = async (reqBody) => {
             status: "success",
             message: "Login successful",
             token: token,
-            data: {
-                _id: admin._id,
-                name: admin.name,
-                email: admin.email
-            }
+            data: { _id: admin._id, name: admin.name, email: admin.email }
         };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -73,12 +59,10 @@ exports.AdminLoginService = async (reqBody) => {
 exports.AdminProfileService = async (email) => {
     try {
         let admin = await AdminModel.findOne({ email }).select('-password');
-        if (!admin) {
-            return { status: "fail", message: "Admin not found" };
-        }
+        if (!admin) return { status: "fail", message: "Admin not found" };
         return { status: "success", data: admin };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -92,17 +76,14 @@ exports.AdminDashboardStatsService = async () => {
             UserModel.countDocuments(),
             ProductModel.countDocuments(),
             InvoiceModel.countDocuments(),
-            InvoiceModel.aggregate([
-                { $group: { _id: null, totalRevenue: { $sum: "$payable_amount" } } }
-            ])
+            InvoiceModel.aggregate([{ $group: { _id: null, totalRevenue: { $sum: "$payable_amount" } } }])
         ]);
-        let totalRevenue = revenueData[0]?.totalRevenue || 0;
         return {
             status: "success",
-            data: { totalUsers, totalProducts, totalOrders, totalRevenue }
+            data: { totalUsers, totalProducts, totalOrders, totalRevenue: revenueData[0]?.totalRevenue || 0 }
         };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -113,7 +94,7 @@ exports.AdminUserListService = async () => {
         let users = await UserModel.find().select('-password').sort({ createdAt: -1 });
         return { status: "success", data: users };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -125,7 +106,7 @@ exports.AdminUserDetailsService = async (id) => {
         if (!user) return { status: "fail", message: "User not found" };
         return { status: "success", data: user };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -137,7 +118,7 @@ exports.AdminDeleteUserService = async (id) => {
         if (!deleted) return { status: "fail", message: "User not found" };
         return { status: "success", message: "User deleted successfully" };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -148,7 +129,7 @@ exports.AdminOrderListService = async () => {
         let orders = await InvoiceModel.find().sort({ createdAt: -1 });
         return { status: "success", data: orders };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -160,7 +141,7 @@ exports.AdminOrderDetailsService = async (id) => {
         if (!order) return { status: "fail", message: "Order not found" };
         return { status: "success", data: order };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -168,16 +149,11 @@ exports.AdminOrderDetailsService = async (id) => {
 exports.AdminOrderStatusService = async (id, reqBody) => {
     try {
         const InvoiceModel = require('../models/InvoiceModel');
-        let { status } = reqBody;
-        let updated = await InvoiceModel.findByIdAndUpdate(
-            id,
-            { delivery_status: status },
-            { new: true }
-        );
+        let updated = await InvoiceModel.findByIdAndUpdate(id, { delivery_status: reqBody.status }, { new: true });
         if (!updated) return { status: "fail", message: "Order not found" };
         return { status: "success", message: "Order status updated", data: updated };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -188,7 +164,7 @@ exports.AdminProductListService = async () => {
         let products = await ProductModel.find().sort({ createdAt: -1 });
         return { status: "success", data: products };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -200,7 +176,7 @@ exports.AdminProductDetailsService = async (id) => {
         if (!product) return { status: "fail", message: "Product not found" };
         return { status: "success", data: product };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -211,7 +187,7 @@ exports.AdminCreateProductService = async (reqBody) => {
         let result = await ProductModel.create(reqBody);
         return { status: "success", data: result };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -233,7 +209,7 @@ exports.AdminUpdateProductService = async (id, reqBody) => {
         if (!updated) return { status: "fail", message: "Product not found" };
         return { status: "success", message: "Product updated successfully", data: updated };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
 
@@ -245,6 +221,6 @@ exports.AdminDeleteProductService = async (id) => {
         if (!deleted) return { status: "fail", message: "Product not found" };
         return { status: "success", message: "Product deleted successfully" };
     } catch (error) {
-        throw new Error(error.message);
+        return { status: "fail", message: error.message };
     }
 };
