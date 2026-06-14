@@ -26,12 +26,16 @@ const UserStore = create((set) => ({
         }));
     },
     UserLogoutRequest: async () => {
-        set({ isFormSubmit: true })
-        let res = await axios.get(`/api/v1/UserLogout`);
-        Cookies.remove('userEmail');
-        set({ isFormSubmit: false })
-        return res.data['status'] === "success";
-    },
+    set({ isFormSubmit: true });
+    const token = Cookies.get('token'); 
+    let res = await axios.get(`/api/v1/UserLogout`, {
+        headers: { 'token': token }       
+    });
+    Cookies.remove('userEmail');
+    Cookies.remove('token');             
+    set({ isFormSubmit: false });
+    return res.data['status'] === "success";
+},
     UserOTPRequest: async (email) => {
         set({ isFormSubmit: true })
         let res = await axios.get(`/api/v1/UserOTP/${email}`);
@@ -144,27 +148,20 @@ ProfileDetails: null,
 
 ProfileDetailsRequest: async () => {
     set({ ProfileLoading: true });
-
     try {
-        let res = await axios.get(`/api/v1/ReadProfile`);
+        const token = Cookies.get('token');  
+        let res = await axios.get(`/api/v1/ReadProfile`, {
+            headers: { 'token': token }     
+        });
 
         if (res.data["data"].length > 0) {
             let data = res.data["data"][0];
-
-            set({
-                ProfileDetails: data,
-                ProfileForm: data,
-                ProfileLoading: false,
-            });
+            set({ ProfileDetails: data, ProfileForm: data, ProfileLoading: false });
         } else {
-            set({
-                ProfileDetails: {},
-                ProfileLoading: false,
-            });
+            set({ ProfileDetails: {}, ProfileLoading: false });
         }
     } catch (e) {
         set({ ProfileLoading: false });
-
         if (e.response && e.response.status === 401) {
             Cookies.remove("token");
             Cookies.remove("userEmail");
@@ -172,7 +169,6 @@ ProfileDetailsRequest: async () => {
         }
     }
 },
-
 ProfileSaveRequest: async (PostBody) => {
     try {
         set({ ProfileLoading: true });

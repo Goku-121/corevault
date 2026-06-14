@@ -2,18 +2,18 @@ const nodemailer = require('nodemailer');
 
 const EmailSend = async (EmailTo, EmailText, EmailSubject) => {
     let transporter = nodemailer.createTransport({
-     host: 'mail.teamrabbil.com',
+     host: 'smtp.gmail.com',
 port: 587,
 secure: false,
 auth: {
-    user: 'info@teamrabbil.com',
-    pass: '~sR4[bhaC[Qs'
+    user: 'khanshovo67@gmail.com',
+    pass: 'dmjhqizwuwvlbvsy'
 },
 tls: { rejectUnauthorized: false }
     });
 
     let mailOptions = {
-        from: `CoreVault <info@teamrabbil.com>`,
+        from: `CoreVault <khanshovo67@gmail.com>`,
         to: EmailTo,
         subject: EmailSubject,
         text: EmailText
