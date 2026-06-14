@@ -35,7 +35,7 @@ const ProductList = ({ categoryId, brandId }) => {
         })();
     }, []);
 
-    // categoryId বা brandId URL থেকে পরিবর্তন হলে Filter reset করো
+    
     useEffect(() => {
         SetFilter({
             brandId: brandId || "",
@@ -45,7 +45,7 @@ const ProductList = ({ categoryId, brandId }) => {
         });
     }, [categoryId, brandId]);
 
-    // Filter পরিবর্তন হলে product load করো
+    
     useEffect(() => {
         const filterToSend = {
             ...Filter,
