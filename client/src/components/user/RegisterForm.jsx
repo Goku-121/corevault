@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 const RegisterForm = () => {
     let navigate = useNavigate();
-    let { RegisterFormData, RegisterFormOnChange, RegisterOTPRequest } = userStore();
+    let { RegisterFormData, RegisterFormOnChange, RegisterRequest } = userStore();
 
     const onFormSubmit = async () => {
         if (!ValidationHelper.IsEmail(RegisterFormData.email)) {
@@ -26,8 +26,7 @@ const RegisterForm = () => {
             toast.error("Passwords do not match");
             return;
         }
-
-        let res = await RegisterOTPRequest(RegisterFormData.email, RegisterFormData.password);
+        let res = await RegisterRequest(RegisterFormData.email, RegisterFormData.password);
         res
             ? (toast.success("Registration successful!"), navigate("/login"))
             : toast.error("Something went wrong. Please try again.");
