@@ -28,7 +28,7 @@ import InvoicePage from "./pages/invoice-page";
 
 const App = () => {
   useEffect(() => {
-    fetch("https://corevault-8qkj.onrender.com/health").catch(() => {});
+    fetch("/health").catch(() => {});
   }, []);
 
   return (
