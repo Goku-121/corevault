@@ -65,16 +65,18 @@ const UserStore = create((set) => ({
             RegisterOtpFormData: { ...state.RegisterOtpFormData, [name]: value }
         }));
     },
-  RegisterOTPRequest: async (email, password) => {
-        set({ isFormSubmit: true })
-        
-        
+RegisterOTPRequest: async (email, password) => {
+    set({ isFormSubmit: true })
+    try {
         let res = await axios.post(`/api/v1/RegisterOTP`, { email, password });
-        
         setEmail(email);
         set({ isFormSubmit: false })
         return res.data['status'] === "success";
-    },
+    } catch  {
+        set({ isFormSubmit: false })
+        return false;
+    }
+},
     VerifyRegisterOTPRequest: async (otp) => {
         set({ isFormSubmit: true })
         let email = getEmail();
