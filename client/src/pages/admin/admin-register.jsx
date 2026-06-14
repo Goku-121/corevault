@@ -67,8 +67,8 @@ const AdminRegister = () => {
 
         const res = await AdminRegisterRequest(name, email, password, adminId, phone);
         if (res) {
-            toast.success("OTP sent to your email!");
-            navigate("/admin/register/verify");
+            toast.success("Admin registration successful!");
+            navigate("/admin/login");
         } else {
             toast.error("Registration failed. Please try again.");
         }
