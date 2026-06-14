@@ -33,11 +33,28 @@ const VerifyOTPService = async (req) => {
 }
 
 const SaveProfileService = async (req) => {
-    let user_id = req.headers.user_id;
-    let reqBody = req.body;
-    reqBody.userID = user_id;
-    await ProfileModel.updateOne({ userID: user_id }, { $set: reqBody }, { upsert: true });
-    return { status: "success", message: "Profile Saved Successfully" };
+    try {
+        let user_id = req.headers.user_id;
+        let reqBody = req.body;
+
+        // MongoDB extra fields বাদ দাও
+        delete reqBody._id;
+        delete reqBody.__v;
+        delete reqBody.createdAt;
+        delete reqBody.updatedAt;
+
+        reqBody.userID = user_id;
+
+        await ProfileModel.updateOne(
+            { userID: user_id },
+            { $set: reqBody },
+            { upsert: true }
+        );
+        return { status: "success", message: "Profile Saved Successfully" };
+    } catch (error) {
+        console.error("SaveProfileService error:", error.message);
+        return { status: "fail", message: error.message };
+    }
 }
 
 const UpdateProfileService = async (req) => {
@@ -99,12 +116,9 @@ const LoginWithPasswordService = async (req) => {
 }
 
 module.exports = {
-    UserOTPService,
-    VerifyOTPService,
     SaveProfileService,
     UpdateProfileService,
     ReadProfileService,
-    RegisterOTPService: RegisterService,
-    VerifyRegisterOTPService: RegisterService,
+    RegisterService,
     LoginWithPasswordService
 }
