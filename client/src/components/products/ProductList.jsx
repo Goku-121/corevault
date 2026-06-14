@@ -170,4 +170,4 @@ const ProductList = ({ categoryId, brandId }) => {
     );
 };
 
-export default ProductList;vvvvvvvvvvvvvvvvvvv
+export default ProductList;
